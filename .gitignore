@@ -1,0 +1,12 @@
+*.pyc
+/db.sqlite3*
+*~
+virtualenv/
+.idea/
+experiments.py
+card_cp/settings_local.py
+card_cp/settings.py
+*_old
+/backup-*
+.DS_Store
+tempcards/

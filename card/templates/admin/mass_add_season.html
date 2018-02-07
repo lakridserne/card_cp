@@ -1,0 +1,75 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+{{mass_add_form.media}}
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<script type="text/javascript" src="{% static "admin/js/core.js" %}"></script>
+<script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
+<script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' 'card' %}">Kort</a>
+&rsaquo; <a href="{% url 'admin:card_participants_changelist' %}">Deltagere</a>
+&rsaquo; Tilføj deltagere til sæson
+</div>
+{% endblock %}
+
+{% block content_title %}<h1>Tilføj flere deltagere til en sæson</h1>{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <form action="" method="post">
+    <div>
+      <fieldset class="module aligned">
+        <h2>Vælg sæson</h2>
+        <div class="description">
+          <p>Gennemgå listen og vælg den korrekte sæson deltagerne skal tilføjes til.</p>
+          <p>Alle deltagerne tilføjes til sæsonen!<p>
+        </div>
+
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_to_season">
+        <input type="hidden" name="select_across" value="0">
+        <input type="hidden" name="index" value="0">
+        {% for obj in queryset %}
+          <input type="hidden" name="_selected_action" value="{{ obj.pk }}" />
+        {% endfor %}
+        {% for field in mass_add_season_form %}
+          <div class="form-row field-{{field.name}}">
+              {{ field.errors }}
+              {{ field.label_tag }} {{ field }}
+          </div>
+        {% endfor %}
+
+        <h2>Bekræft deltagere</h2>
+        <div class="description">
+          <p>Følgene ({{persons.count}}) deltagere tilføjes:</p>
+          <p>
+            <ul>
+              {% for person in persons %}
+              <li>{{person.name}}</li>
+              {% endfor %}
+            </ul>
+          </p>
+        </div>
+
+        <div class="submit-row">
+          <p class="deletelink-box"><a href="../" class="deletelink">Fortryd</a></p>
+          <input class="default" name="" type="submit" value="Gem">
+        </div>
+      </fieldset>
+    </div>
+  </form>
+
+</div>
+
+{% endblock %}
