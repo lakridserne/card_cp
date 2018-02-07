@@ -7,8 +7,6 @@ from card.models import (Participants, Cards, Season, SeasonParticipant,
 ParticipantsFile, Workshop, WorkshopParticipant, Attendance)
 from django.contrib import messages
 
-# Register your models here.
-
 admin.site.site_header="Coding Pirates Fraværssystem"
 admin.site.index_title="Fraværsadministration"
 
