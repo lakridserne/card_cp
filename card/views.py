@@ -31,11 +31,16 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
         # get current workshop
         workshopparticipants = WorkshopParticipant.objects.filter(seasonparticipant=seasonparticipants, added__lte=timezone.now()).order_by('-id')
         workshopparticipant = workshopparticipants[0]
-        Attendance.objects.create(
-            participant=participant,
-            season=season,
-            workshop=workshopparticipant.workshop,
-            registered_dtm=timezone.now(),
-            status="PR"
-        )
+
+        # get attendance and see if person has checked in today
+        attendance = Attendance.objects.filter(participant=participant, season=season, workshop=workshopparticipant.workshop, registered_dtm__date=timezone.now())
+
+        if not attendance.exists():
+            Attendance.objects.create(
+                participant=participant,
+                season=season,
+                workshop=workshopparticipant.workshop,
+                registered_dtm=timezone.now(),
+                status="PR"
+            )
         return self.queryset
