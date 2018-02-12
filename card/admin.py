@@ -7,7 +7,7 @@ from card.models import (Participants, Cards, Season, SeasonParticipant,
 ParticipantsFile, Workshop, WorkshopParticipant, Attendance)
 from django.contrib import messages
 
-admin.site.site_header="Coding Pirates Fraværssystem"
+admin.site.site_header="Coding Pirates Check-in system"
 admin.site.index_title="Fraværsadministration"
 
 class CardNumberInline(admin.TabularInline):
