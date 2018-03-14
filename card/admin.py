@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.db import models, transaction
+from django.utils import timezone
 from django.shortcuts import render
 from django.conf.urls import patterns, include, url
 from card.models import (Participants, Cards, Season, SeasonParticipant,
@@ -86,7 +87,7 @@ class ParticipantAdmin(admin.ModelAdmin):
     list_display = ('name', 'age_years')
     list_filter = (SeasonListFilter,WorkshopListFilter,CardListFilter)
     search_fields = ('name', 'cards__card_number')
-    actions = ['add_to_season','add_to_workshop']
+    actions = ['add_to_season','add_to_workshop','register_attendance_multi']
     inlines = (CardNumberInline, SeasonInline, WorkshopInline)
 
     def add_to_season(self, request, queryset):
@@ -197,13 +198,10 @@ class ParticipantAdmin(admin.ModelAdmin):
     add_to_workshop.short_description = "Tilføj til workshop"
 
     def register_attendance_multi(self, request, queryset):
-        # get list of workshops
-        workshops = Workshop.objects.all()
-        workshop_list=[('-', '-')]
-        for workshop in workshops:
-            workshop_list.append((workshop.id, workshop.name))
+        # make list of possibilities
+        status_list = [('-','-'),('PR','Fremmødt'),('NO','Afbud')]
         class MassAdd(forms.Form):
-            workshop = forms.ChoiceField(label='Workshop', choices=workshop_list)
+            status = forms.ChoiceField(label='Status', choices=status_list)
         # get selected persons
         persons = queryset
 
@@ -212,43 +210,47 @@ class ParticipantAdmin(admin.ModelAdmin):
         context['queryset'] = queryset
 
         if request.method == 'POST':
-            mass_add_workshop_form = MassAdd(request.POST)
-            context['mass_add_workshop_form'] = mass_add_workshop_form
+            register_attendance_multi_form = MassAdd(request.POST)
+            context['register_attendance_multi_form'] = register_attendance_multi_form
 
-            if mass_add_workshop_form.is_valid() and mass_add_workshop_form.cleaned_data['workshop'] != '-':
-                workshop = Workshop.objects.get(pk=mass_add_workshop_form.cleaned_data['workshop'])
+            if register_attendance_multi_form.is_valid() and register_attendance_multi_form.cleaned_data['status'] != '-':
 
                 # make sure person is not already added
                 added_counter = 0
-                already_added = Participants.objects.filter(workshopparticipant__workshop=mass_add_workshop_form.cleaned_data['workshop'], workshopparticipant__participant__in=queryset).all()
+                already_added = Attendance.objects.filter(participant__in=queryset,registered_dtm__date=timezone.now()).all()
                 list(already_added)
-                already_added_ids = already_added.values_list('id', flat=True)
+                already_added_ids = already_added.values_list('participant__id', flat=True)
 
                 try:
                     with transaction.atomic():
                         for current_participant in queryset:
                             if (current_participant.id not in already_added_ids):
                                 added_counter += 1
-                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id)
-                                add_participant = WorkshopParticipant(seasonparticipant=seasonparticipant,workshop=workshop,participant=current_participant)
-                                add_participant.save()
+                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,season__start_date__lte=timezone.now(),season__end_date__gte=timezone.now()) # we need to make this unique... Add date
+                                season = Season.objects.get(pk=seasonparticipant.season.id)
+                                workshopparticipant = WorkshopParticipant.objects.get(seasonparticipant__pk=seasonparticipant.id,added__lte=timezone.now())
+                                workshop = Workshop.objects.get(pk=workshopparticipant.workshop.id)
+                                registered_dtm = timezone.now()
+                                status = register_attendance_multi_form.cleaned_data['status']
+                                add_attendance = Attendance(participant=current_participant,season=season,workshop=workshop,registered_dtm=registered_dtm,status=status)
+                                add_attendance.save()
                 except Exception as e:
-                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + ".")
+                    messages.error(request,"Fejl - ingen personer fik registreret fremmøde. Der var problemer med " + add_attendance.participant.name + ".")
                     return
 
                 #return ok message
                 already_added_text=""
                 if(already_added.count()):
-                    already_added_text = ". Dog var : " + str.join(', ', already_added.values_list('name', flat=True)) + " allerede tilføjet!"
-                messages.success(request, str(added_counter) + " af " + str(queryset.count()) + " valgte personer blev tilføjet til " + str(workshop) + already_added_text)
+                    already_added_text = ". Dog var: " + str.join(', ', already_added.values_list('participant__name', flat=True)) + " allerede registreret i dag!"
+                messages.success(request, str(added_counter) + " af " + str(queryset.count()) + " valgte personer fik registreret fremmøde." + already_added_text)
                 return
             else:
-                messages.error(request, 'Du skal vælge en workshop')
+                messages.error(request, 'Du skal vælge en status')
         else:
-            context['mass_add_workshop_form'] = MassAdd()
+            context['register_attendance_multi_form'] = MassAdd()
 
-        return render(request, 'admin/mass_add_workshop.html', context)
-    add_to_workshop.short_description = "Tilføj til workshop"
+        return render(request, 'admin/register_attendance_multi.html', context)
+    register_attendance_multi.short_description = "Registrer fremmøde"
 admin.site.register(Participants, ParticipantAdmin)
 
 class SeasonAdmin(admin.ModelAdmin):

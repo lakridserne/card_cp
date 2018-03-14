@@ -134,3 +134,9 @@ class ParticipantsFile(models.Model):
                     name=row[1],
                     birthday=row[2],
                 )
+
+class Department(models.Model):
+    class Meta:
+        verbose_name = "Afdeling"
+        verbose_name_plural = "Afdelinger"
+    name=model.CharField("Navn",max_length=128)
