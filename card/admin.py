@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.conf.urls import patterns, include, url
 from card.models import (Participants, Cards, Season, SeasonParticipant,
-ParticipantsFile, Workshop, WorkshopParticipant, Attendance)
+ParticipantsFile, Workshop, WorkshopParticipant, Attendance, Department, Union)
 from django.contrib import messages
 
 admin.site.site_header="Coding Pirates Check-in system"
@@ -271,3 +271,5 @@ admin.site.register(Attendance,AttendanceAdmin)
 admin.site.register(SeasonParticipant)
 admin.site.register(ParticipantsFile)
 admin.site.register(Workshop)
+admin.site.register(Department)
+admin.site.register(Union)

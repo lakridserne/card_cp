@@ -25,6 +25,25 @@ class Participants(models.Model):
     age_years.admin_order_field = '-birthday'
     age_years.short_description = "Alder"
 
+class Union(models.Model):
+    class Meta:
+        verbose_name = "Forening"
+        verbose_name_plural = "Foreninger"
+    name = models.CharField("Navn",max_length=128)
+
+    def __str__(self):
+        return self.name
+
+class Department(models.Model):
+    class Meta:
+        verbose_name = "Afdeling"
+        verbose_name_plural = "Afdelinger"
+    name = models.CharField("Navn",max_length=128)
+    union = models.ForeignKey(Union,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
 class Cards(models.Model):
     class Meta:
         verbose_name = "Kort"
@@ -58,6 +77,7 @@ class Season(models.Model):
     start_date = models.DateField('Startdato',blank=False,null=False)
     end_date = models.DateField('Slutdato',blank=False,null=False)
     weekday = models.CharField('Ugedag',blank=False,null=False,max_length=2,choices=DAYS_CHOICES)
+    department = models.ForeignKey(Department,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -134,9 +154,3 @@ class ParticipantsFile(models.Model):
                     name=row[1],
                     birthday=row[2],
                 )
-
-class Department(models.Model):
-    class Meta:
-        verbose_name = "Afdeling"
-        verbose_name_plural = "Afdelinger"
-    name=model.CharField("Navn",max_length=128)
