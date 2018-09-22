@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db import models, transaction
 from django.utils import timezone
 from django.shortcuts import render
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from card.models import (Participants, Cards, Season, SeasonParticipant,
 ParticipantsFile, Workshop, WorkshopParticipant, Attendance, Department, Union)
 from django.contrib import messages

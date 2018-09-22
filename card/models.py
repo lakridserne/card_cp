@@ -1,18 +1,15 @@
 from django.db import models
-from datetime import datetime, timedelta
-from django.template import Engine, Context
-from django.core.mail import send_mail
-from django.utils import timezone, html
+from django.utils import timezone
 import csv
 
-# Create your models here.
 
 class Participants(models.Model):
     class Meta:
         verbose_name = "Deltager"
         verbose_name_plural = "Deltagere"
-    members_id = models.CharField('ID i medlemssystemet',max_length=6,blank=False,null=False,unique=True)
-    name = models.CharField('Navn',max_length=200)
+    members_id = models.CharField('ID i medlemssystemet', max_length=6,
+                                  blank=False, null=False, unique=True)
+    name = models.CharField('Navn', max_length=200)
     birthday = models.DateField('Fødselsdag')
 
     def __str__(self):
