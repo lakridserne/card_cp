@@ -1,14 +1,25 @@
 import sys
 from httplib2 import Http
 
+
 def get_status_code(path):
     h = Http()
     resp, content = h.request(path, "GET")
     return resp.status
 
+
 def get_card_number():
     # translate numbers
-    hid = { 30: '1', 31: '2', 32: '3', 33: '4', 34: '5', 35: '6', 36: '7', 37: '8', 38: '9', 39: '0' }
+    hid = {30: '1',
+           31: '2',
+           32: '3',
+           33: '4',
+           34: '5',
+           35: '6',
+           36: '7',
+           37: '8',
+           38: '9',
+           39: '0'}
 
     print("Swipe your card: ")
     if sys.platform == "linux" or sys.platform == "linux2":
@@ -33,8 +44,11 @@ def get_card_number():
 
     return ss
 
+
 while 1:
     ss = get_card_number()
     print(ss)
-    if(get_status_code("http://kort.codingpirates.dk/checkin/" + ss + "/") == 200):
-        print("success")
+    if(get_status_code(
+                        "https://kort.codingpirates.dk/checkin/" + ss + "/"
+                        ) == 200):
+        print("Velkommen")
