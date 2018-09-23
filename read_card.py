@@ -47,7 +47,6 @@ def get_card_number():
 
 while 1:
     ss = get_card_number()
-    print(ss)
     if(get_status_code(
                         "https://kort.codingpirates.dk/checkin/" + ss + "/"
                         ) == 200):
