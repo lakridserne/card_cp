@@ -19,13 +19,14 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
         # figure out season and workshop
 
         # find season participant participates in now - if any
+        """
         workshopparticipants = WorkshopParticipant.objects.filter(
             participant=participant).filter(
             seasonparticipant__season__start_date__lte=timezone.now()).filter(
             seasonparticipant__season__end_date__gte=timezone.now()).filter(
             seasonparticipant__season__weekday=timezone.now().weekday())
-
         """
+
         # first find the seasons currently ongoing
         seasons = Season.objects.filter(
                                         start_date__lte=timezone.now()).filter(
@@ -63,5 +64,5 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
                 status="PR"
             )
         return self.queryset
-        """
+
         print(workshopparticipants)
