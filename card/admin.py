@@ -5,23 +5,55 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.conf.urls import include, url
 from card.models import (Participants, Cards, Season, SeasonParticipant,
-ParticipantsFile, Workshop, WorkshopParticipant, Attendance, Department, Union)
+                         ParticipantsFile, Workshop, WorkshopParticipant,
+                         Attendance, Department, Union)
 from django.contrib import messages
+from daterange_filter.filter import DateRangeFilter
 
-admin.site.site_header="Coding Pirates Check-in system"
-admin.site.index_title="Check-in Coding Pirates"
+admin.site.site_header = "Coding Pirates Check-in system"
+admin.site.index_title = "Check-in Coding Pirates"
+
 
 class CardNumberInline(admin.TabularInline):
     model = Cards
     extra = 1
 
+
 class SeasonInline(admin.TabularInline):
     model = SeasonParticipant
     extra = 0
 
+
 class WorkshopInline(admin.TabularInline):
     model = WorkshopParticipant
     extra = 0
+
+
+class ParticipantDepartmentListFilter(admin.SimpleListFilter):
+    title = ('Afdeling')
+    parameter_name = 'dept'
+
+    def lookups(self, request, model_admin):
+        departments = Department.objects.all()
+        department_list = [('any', 'Alle i en afdeling'),
+                           ('none', 'Ikke i en afdeling')]
+        for department in departments:
+            department_list.append((str(department.pk), str(department)))
+        return department_list
+
+    def queryset(self, request, queryset):
+        if self.value() == 'any':
+            return queryset.exclude(
+                seasonparticipant__season__department__isnull=True)
+        elif self.value() == 'none':
+            return queryset.filter(
+                seasonparticipant__season__department__isnull=True)
+        elif self.value() is None:
+            return queryset
+        else:
+            return queryset.filter(
+                seasonparticipant__season__department=self.value())
+
 
 class SeasonListFilter(admin.SimpleListFilter):
     title = ('Sæson')
@@ -29,7 +61,8 @@ class SeasonListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         seasons = Season.objects.all()
-        season_list = [('any','Alle deltagere samlet'), ('none','Deltager ikke i en sæson')]
+        season_list = [('any', 'Alle deltagere samlet'),
+                       ('none', 'Deltager ikke i en sæson')]
         for season in seasons:
             season_list.append((str(season.pk), str(season)))
         return season_list
@@ -39,10 +72,11 @@ class SeasonListFilter(admin.SimpleListFilter):
             return queryset.exclude(seasonparticipant__isnull=True)
         elif self.value() == 'none':
             return queryset.filter(seasonparticipant__isnull=True)
-        elif self.value() == None:
+        elif self.value() is None:
             return queryset
         else:
             return queryset.filter(seasonparticipant__season=self.value())
+
 
 class WorkshopListFilter(admin.SimpleListFilter):
     title = ('Workshop')
@@ -60,18 +94,18 @@ class WorkshopListFilter(admin.SimpleListFilter):
             return queryset.exclude(workshopparticipant__isnull=True)
         elif self.value() == 'none':
             return queryset.filter(workshopparticipant__isnull=True)
-        elif self.value() == None:
+        elif self.value() is None:
             return queryset
         else:
             return queryset.filter(workshopparticipant__workshop=self.value())
+
 
 class CardListFilter(admin.SimpleListFilter):
     title = ('Kort')
     parameter_name = 'card'
 
     def lookups(self, request, model_admin):
-        cards = Cards.objects.all()
-        card_list = [('any','Alle med kort'),('none','Alle uden kort')]
+        card_list = [('any', 'Alle med kort'), ('none', 'Alle uden kort')]
         return card_list
 
     def queryset(self, request, queryset):
@@ -79,23 +113,26 @@ class CardListFilter(admin.SimpleListFilter):
             return queryset.exclude(cards__isnull=True)
         elif self.value() == 'none':
             return queryset.filter(cards__isnull=True)
-        elif self.value() == None:
+        elif self.value() is None:
             return queryset
+
 
 class ParticipantAdmin(admin.ModelAdmin):
     model = Participants
     list_display = ('name', 'age_years')
-    list_filter = (SeasonListFilter,WorkshopListFilter,CardListFilter)
+    list_filter = (ParticipantDepartmentListFilter, SeasonListFilter,
+                   WorkshopListFilter, CardListFilter)
     search_fields = ('name', 'cards__card_number')
-    actions = ['add_to_season','add_to_workshop','register_attendance_multi']
+    actions = ['add_to_season', 'add_to_workshop', 'register_attendance_multi']
     inlines = (CardNumberInline, SeasonInline, WorkshopInline)
 
     def add_to_season(self, request, queryset):
         # get list of seasons
         seasons = Season.objects.all()
-        season_list=[('-', '-')]
+        season_list = [('-', '-')]
         for season in seasons:
             season_list.append((season.id, season.name))
+
         class MassAdd(forms.Form):
             season = forms.ChoiceField(label='Sæson', choices=season_list)
         # get selected persons
@@ -109,28 +146,36 @@ class ParticipantAdmin(admin.ModelAdmin):
             mass_add_season_form = MassAdd(request.POST)
             context['mass_add_season_form'] = mass_add_season_form
 
-            if mass_add_season_form.is_valid() and mass_add_season_form.cleaned_data['season'] != '-':
-                season = Season.objects.get(pk=mass_add_season_form.cleaned_data['season'])
+            if (mass_add_season_form.is_valid() and
+               mass_add_season_form.cleaned_data['season'] != '-'):
+                season = Season.objects.get(
+                    pk=mass_add_season_form.cleaned_data['season'])
 
                 # make sure person is not already added
                 added_counter = 0
-                already_added = Participants.objects.filter(seasonparticipant__season=mass_add_season_form.cleaned_data['season'], seasonparticipant__participant__in=queryset).all()
+                already_added = Participants.objects.filter(
+                    seasonparticipant__season=mass_add_season_form.cleaned_data
+                    ['season'],
+                    seasonparticipant__participant__in=queryset).all()
                 list(already_added)
                 already_added_ids = already_added.values_list('id', flat=True)
 
                 try:
                     with transaction.atomic():
                         for current_participant in queryset:
-                            if (current_participant.id not in already_added_ids):
+                            if (current_participant.id
+                               not in already_added_ids):
                                 added_counter += 1
-                                add_participant = SeasonParticipant(season=season,participant=current_participant)
+                                add_participant = SeasonParticipant(
+                                    season=season,
+                                    participant=current_participant)
                                 add_participant.save()
                 except Exception as e:
-                    messages.error(request,"Fejl - ingen personer blev tilføjet til sæsonen. Der var problemer med " + add_participant.participant.name + ".")
+                    messages.error(request, "Fejl - ingen personer blev tilføjet til sæsonen. Der var problemer med " + add_participant.participant.name + ".")
                     return
 
-                #return ok message
-                already_added_text=""
+                # return ok message
+                already_added_text = ""
                 if(already_added.count()):
                     already_added_text = ". Dog var : " + str.join(', ', already_added.values_list('name', flat=True)) + " allerede tilføjet!"
                 messages.success(request, str(added_counter) + " af " + str(queryset.count()) + " valgte personer blev tilføjet til " + str(season) + already_added_text)
@@ -146,9 +191,10 @@ class ParticipantAdmin(admin.ModelAdmin):
     def add_to_workshop(self, request, queryset):
         # get list of workshops
         workshops = Workshop.objects.all()
-        workshop_list=[('-', '-')]
+        workshop_list = [('-', '-')]
         for workshop in workshops:
             workshop_list.append((workshop.id, workshop.name))
+
         class MassAdd(forms.Form):
             workshop = forms.ChoiceField(label='Workshop', choices=workshop_list)
         # get selected persons
@@ -263,11 +309,43 @@ class WorkshopParticipantAdmin(admin.ModelAdmin):
     list_display = ('seasonparticipant_name','workshop')
 admin.site.register(WorkshopParticipant,WorkshopParticipantAdmin)
 
-class AttendanceAdmin(admin.ModelAdmin):
-    model = Attendance
-    list_display = ('participant','season','workshop','registered_dtm','status')
-admin.site.register(Attendance,AttendanceAdmin)
 
+class AttendanceDepartmentListFilter(admin.SimpleListFilter):
+    title = ('afdeling')
+    parameter_name = 'dept'
+
+    def lookups(self, request, model_admin):
+        departments = Department.objects.all()
+        department_list = [('any', 'Alle i en afdeling'),
+                           ('none', 'Ikke i en afdeling')]
+        for department in departments:
+            department_list.append((str(department.pk), str(department)))
+        return department_list
+
+    def queryset(self, request, queryset):
+        if self.value() == 'any':
+            return queryset.exclude(
+                season__department__isnull=True)
+        elif self.value() == 'none':
+            return queryset.filter(
+                season__department__isnull=True)
+        elif self.value() is None:
+            return queryset
+        else:
+            return queryset.filter(
+                season__department=self.value())
+
+
+class AttendanceAdmin(admin.ModelAdmin):
+    date_hierachy = 'registered_dtm'
+    list_filter = (AttendanceDepartmentListFilter, ('registered_dtm',
+                   DateRangeFilter))
+    list_display = ('participant', 'season', 'workshop', 'registered_dtm',
+                    'status')
+    model = Attendance
+
+
+admin.site.register(Attendance, AttendanceAdmin)
 admin.site.register(SeasonParticipant)
 admin.site.register(ParticipantsFile)
 admin.site.register(Workshop)
