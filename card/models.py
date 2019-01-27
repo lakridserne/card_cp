@@ -17,38 +17,46 @@ class Participants(models.Model):
 
     def age_years(self):
         today = timezone.now().date()
-        return today.year - self.birthday.year - ((today.month, today.day) < (self.birthday.month, self.birthday.day))
+        return (today.year - self.birthday.year -
+                ((today.month, today.day) < (self.birthday.month,
+                 self.birthday.day)))
 
     age_years.admin_order_field = '-birthday'
     age_years.short_description = "Alder"
+
 
 class Union(models.Model):
     class Meta:
         verbose_name = "Forening"
         verbose_name_plural = "Foreninger"
-    name = models.CharField("Navn",max_length=128)
+    name = models.CharField("Navn", max_length=128)
 
     def __str__(self):
         return self.name
+
 
 class Department(models.Model):
     class Meta:
         verbose_name = "Afdeling"
         verbose_name_plural = "Afdelinger"
-    name = models.CharField("Navn",max_length=128)
-    union = models.ForeignKey(Union,on_delete=models.CASCADE)
+    name = models.CharField("Navn", max_length=128)
+    union = models.ForeignKey(Union, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
+
 
 class Cards(models.Model):
     class Meta:
         verbose_name = "Kort"
         verbose_name_plural = "Kort"
-    participant = models.ForeignKey(Participants,on_delete=models.CASCADE)
-    card_number = models.CharField('Kortnummer',max_length=10,unique=True,blank=True,null=True)
-    activated = models.DateTimeField('Aktiveret',blank=False,null=False,default=timezone.now)
-    deactivated = models.DateTimeField('Deaktiveret',blank=True,null=True)
+    participant = models.ForeignKey(Participants, on_delete=models.CASCADE)
+    card_number = models.CharField('Kortnummer', max_length=10, unique=True,
+                                   blank=True, null=True)
+    activated = models.DateTimeField('Aktiveret', blank=False, null=False,
+                                     default=timezone.now)
+    deactivated = models.DateTimeField('Deaktiveret', blank=True, null=True)
+
 
 class Season(models.Model):
     class Meta:
@@ -70,50 +78,59 @@ class Season(models.Model):
         (SATURDAY, 'Lørdag'),
         (SUNDAY, 'Søndag')
     )
-    name = models.CharField('Navn',max_length=200)
-    start_date = models.DateField('Startdato',blank=False,null=False)
-    end_date = models.DateField('Slutdato',blank=False,null=False)
-    weekday = models.CharField('Ugedag',blank=False,null=False,max_length=2,choices=DAYS_CHOICES)
-    department = models.ForeignKey(Department,on_delete=models.CASCADE)
+    name = models.CharField('Navn', max_length=200)
+    start_date = models.DateField('Startdato', blank=False, null=False)
+    end_date = models.DateField('Slutdato', blank=False, null=False)
+    weekday = models.CharField('Ugedag', blank=False, null=False, max_length=2,
+                               choices=DAYS_CHOICES)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
+        return self.name + ", " + self.department.name
+
 
 class SeasonParticipant(models.Model):
     class Meta:
         verbose_name = "Sæsondeltager"
         verbose_name_plural = "Sæsondeltagere"
-    season = models.ForeignKey(Season,on_delete=models.CASCADE)
-    participant = models.ForeignKey(Participants,on_delete=models.CASCADE)
-    added = models.DateTimeField('Tilføjet',default=timezone.now)
-    stopped = models.DateTimeField('Stoppet',blank=True,null=True)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participants, on_delete=models.CASCADE)
+    added = models.DateTimeField('Tilføjet', default=timezone.now)
+    stopped = models.DateTimeField('Stoppet', blank=True, null=True)
+
     def __str__(self):
         return self.participant.name + ", " + self.season.name
+
 
 class Workshop(models.Model):
     class Meta:
         verbose_name = "Workshop"
         verbose_name_plural = "Workshops"
-    name = models.CharField('Navn',max_length=200)
-    season = models.ForeignKey(Season,on_delete=models.CASCADE)
+    name = models.CharField('Navn', max_length=200)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name + ", " + self.season.name
+        return (self.name +
+                ", " + self.season.name +
+                ", " + self.season.department.name)
+
 
 class WorkshopParticipant(models.Model):
     class Meta:
         verbose_name = "Workshopdeltager"
         verbose_name_plural = "Workshopdeltagere"
-    seasonparticipant = models.ForeignKey(SeasonParticipant,on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop,on_delete=models.CASCADE)
-    participant = models.ForeignKey(Participants,on_delete=models.CASCADE)
-    added = models.DateField('Tilføjet',default=timezone.now)
+    seasonparticipant = models.ForeignKey(SeasonParticipant,
+                                          on_delete=models.CASCADE)
+    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participants, on_delete=models.CASCADE)
+    added = models.DateField('Tilføjet', default=timezone.now)
 
     def __str__(self):
         return self.seasonparticipant.participant.name
 
     def seasonparticipant_name(self):
         return self.seasonparticipant.participant.name
+
 
 class Attendance(models.Model):
     class Meta:
@@ -125,14 +142,16 @@ class Attendance(models.Model):
         (NOTICE, 'Afbud'),
         (PRESENT, 'Til stede'),
     )
-    participant = models.ForeignKey(Participants,on_delete=models.CASCADE)
-    season = models.ForeignKey(Season,on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop,on_delete=models.CASCADE)
-    registered_dtm = models.DateTimeField('Registreret',default=timezone.now)
-    status = models.CharField('Fremmøde status',blank=False,null=False,max_length=2,choices=ABSENCE_CHOICES)
+    participant = models.ForeignKey(Participants, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
+    registered_dtm = models.DateTimeField('Registreret', default=timezone.now)
+    status = models.CharField('Fremmøde status', blank=False, null=False,
+                              max_length=2, choices=ABSENCE_CHOICES)
 
     def __str__(self):
         return self.participant.name
+
 
 class ParticipantsFile(models.Model):
     class Meta:
