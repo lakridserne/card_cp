@@ -302,10 +302,14 @@ class ParticipantAdmin(admin.ModelAdmin):
     register_attendance_multi.short_description = "Registrer fremmøde"
 admin.site.register(Participants, ParticipantAdmin)
 
+
 class SeasonAdmin(admin.ModelAdmin):
     model = Season
-    list_display = ('name','start_date','end_date','weekday')
+    list_display = ('name', 'department', 'start_date', 'end_date', 'weekday')
+
+
 admin.site.register(Season, SeasonAdmin)
+
 
 class WorkshopParticipantAdmin(admin.ModelAdmin):
     model = WorkshopParticipant
