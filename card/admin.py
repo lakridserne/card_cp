@@ -131,7 +131,8 @@ class ParticipantAdmin(admin.ModelAdmin):
         seasons = Season.objects.all()
         season_list = [('-', '-')]
         for season in seasons:
-            season_list.append((season.id, season.name))
+            season_list.append((season.id, season.name + ", " +
+                                season.department.name))
 
         class MassAdd(forms.Form):
             season = forms.ChoiceField(label='Sæson', choices=season_list)
@@ -193,7 +194,9 @@ class ParticipantAdmin(admin.ModelAdmin):
         workshops = Workshop.objects.all()
         workshop_list = [('-', '-')]
         for workshop in workshops:
-            workshop_list.append((workshop.id, workshop.name))
+            workshop_list.append((workshop.id, workshop.name + ", " +
+                                  workshop.season.name + ", " +
+                                  workshop.season.department.name))
 
         class MassAdd(forms.Form):
             workshop = forms.ChoiceField(label='Workshop', choices=workshop_list)
