@@ -160,6 +160,7 @@ class WiFiPasswords(models.Model):
     wifi_password = models.CharField("WiFi Password", max_length=128, null=True, blank=True)
     username = models.CharField("Brugernavn", max_length=128, blank=True, null=True)
     password = models.CharField("Kode", max_length=128, blank=True, null=True)
+    random_person = models.BooleanField("Tilfældig person", default=False)
     seasonparticipant = models.ForeignKey("SeasonParticipant", on_delete=models.CASCADE, blank=True, null=True)
     season = models.ForeignKey("Season", on_delete=models.CASCADE, blank=True, null=True)
     start_dtm = models.DateTimeField("Start", default=timezone.now)
