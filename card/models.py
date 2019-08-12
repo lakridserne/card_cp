@@ -146,11 +146,24 @@ class Attendance(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
     registered_dtm = models.DateTimeField('Registreret', default=timezone.now)
-    status = models.CharField('Fremmøde status', blank=False, null=False,
-                              max_length=2, choices=ABSENCE_CHOICES)
+    status = models.CharField('Fremmøde status', max_length=2, choices=ABSENCE_CHOICES)
 
     def __str__(self):
         return self.participant.name
+
+
+class WiFiPasswords(models.Model):
+    class Meta:
+        verbose_name = "WiFi Kode"
+        verbose_name_plural = "WiFi Koder"
+    ssid = models.CharField("SSID", max_length=32)
+    wifi_password = models.CharField("WiFi Password", max_length=128, null=True, blank=True)
+    username = models.CharField("Brugernavn", max_length=128, blank=True, null=True)
+    password = models.CharField("Kode", max_length=128, blank=True, null=True)
+    seasonparticipant = models.ForeignKey("SeasonParticipant", on_delete=models.CASCADE, blank=True, null=True)
+    season = models.ForeignKey("Season", on_delete=models.CASCADE, blank=True, null=True)
+    start_dtm = models.DateTimeField("Start", default=timezone.now)
+    end_dtm = models.DateTimeField("Slut", blank=True, null=True)
 
 
 class ParticipantsFile(models.Model):
