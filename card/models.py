@@ -7,22 +7,10 @@ class Participants(models.Model):
     class Meta:
         verbose_name = "Deltager"
         verbose_name_plural = "Deltagere"
-    members_id = models.CharField('ID i medlemssystemet', max_length=6,
-                                  blank=False, null=False, unique=True)
     name = models.CharField('Navn', max_length=200)
-    birthday = models.DateField('Fødselsdag')
 
     def __str__(self):
         return self.name
-
-    def age_years(self):
-        today = timezone.now().date()
-        return (today.year - self.birthday.year -
-                ((today.month, today.day) < (self.birthday.month,
-                 self.birthday.day)))
-
-    age_years.admin_order_field = '-birthday'
-    age_years.short_description = "Alder"
 
 
 class Union(models.Model):
@@ -160,11 +148,55 @@ class WiFiPasswords(models.Model):
     wifi_password = models.CharField("WiFi Password", max_length=128, null=True, blank=True)
     username = models.CharField("Brugernavn", max_length=128, blank=True, null=True)
     password = models.CharField("Kode", max_length=128, blank=True, null=True)
-    random_person = models.BooleanField("Tilfældig person", default=False)
     seasonparticipant = models.ForeignKey("SeasonParticipant", on_delete=models.CASCADE, blank=True, null=True)
     season = models.ForeignKey("Season", on_delete=models.CASCADE, blank=True, null=True)
     start_dtm = models.DateTimeField("Start", default=timezone.now)
     end_dtm = models.DateTimeField("Slut", blank=True, null=True)
+    active = models.BooleanField("Aktiv", default=True)
+
+
+class WiFiFile(models.Model):
+    class Meta:
+        verbose_name = "Upload WiFi kode"
+        verbose_name_plural = "Upload WiFi koder"
+    ssid = models.CharField("SSID", max_length=32)
+    wifi_password = models.CharField("WiFi Password", max_length=128, null=True, blank=True)
+    data = models.FileField()
+    season = models.ForeignKey("Season", on_delete=models.CASCADE)
+    help_text = "Skal koderne være til sæsonen? Alternativet er at de bruges til hver deltager på sæsonen (tilfældig kode til hver indtil der ikke er flere tilbage på den dato)."
+    for_season = models.BooleanField("Koder til sæsonen?", help_text=help_text, default=False)
+
+    def save(self, *args, **kwargs):
+        super(WiFiFile, self).save(*args, **kwargs)
+        filename = self.data.url
+        season_participants = SeasonParticipant.objects.filter(season=self.season)
+        i = 0
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            next(reader)
+            for row in reader:
+                if self.for_season:
+                    _, created = WiFiPasswords.objects.get_or_create(
+                        ssid = self.ssid,
+                        wifi_password = self.wifi_password,
+                        username = row[0],
+                        password = row[1],
+                        start_dtm = row[2],
+                        end_dtm = row[3],
+                        season = self.season,
+                    )
+                else:
+                    _, created = WiFiPasswords.objects.get_or_create(
+                        ssid = self.ssid,
+                        wifi_password = self.wifi_password,
+                        username = row[0],
+                        password = row[1],
+                        start_dtm = row[2],
+                        end_dtm = row[3],
+                        seasonparticipant = season_participants[i]
+                    )
+                    i += 1
+        self.delete()
 
 
 class ParticipantsFile(models.Model):
@@ -177,10 +209,10 @@ class ParticipantsFile(models.Model):
         super(ParticipantsFile, self).save(*args, **kwargs)
         filename = self.data.url
         with open(filename, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
+            reader = csv.reader(f, delimiter = ';')
+            next(reader)
             for row in reader:
                 _, created = Participants.objects.get_or_create(
-                    members_id=row[0],
-                    name=row[1],
-                    birthday=row[2],
+                    name=row[0],
                 )
+        self.delete()

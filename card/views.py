@@ -26,8 +26,7 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
 
         if not seasonparticipants:
             HttpResponseBadRequest("Der er ingen sæsoner. Kontakt kaptajnen")
-        else:
-            seasonparticipant = seasonparticipants[0]
+        seasonparticipant = seasonparticipants[0]
 
         # get current workshop
         workshopparticipants = WorkshopParticipant.objects.filter(
@@ -49,4 +48,5 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
                 registered_dtm=timezone.now(),
                 status="PR"
             )
+
         return self.queryset

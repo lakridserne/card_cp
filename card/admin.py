@@ -6,7 +6,8 @@ from django.shortcuts import render
 from django.conf.urls import include, url
 from card.models import (Participants, Cards, Season, SeasonParticipant,
                          ParticipantsFile, Workshop, WorkshopParticipant,
-                         Attendance, Department, Union)
+                         Attendance, Department, Union, WiFiPasswords,
+                         WiFiFile)
 from django.contrib import messages
 from daterange_filter.filter import DateRangeFilter
 
@@ -119,7 +120,7 @@ class CardListFilter(admin.SimpleListFilter):
 
 class ParticipantAdmin(admin.ModelAdmin):
     model = Participants
-    list_display = ('name', 'age_years')
+    list_display = ('name',)
     list_filter = (ParticipantDepartmentListFilter, SeasonListFilter,
                    WorkshopListFilter, CardListFilter)
     search_fields = ('name', 'cards__card_number')
@@ -352,9 +353,17 @@ class AttendanceAdmin(admin.ModelAdmin):
     model = Attendance
 
 
+class WiFiPasswordAdmin(admin.ModelAdmin):
+    model = WiFiPasswords
+    list_display = ('ssid', 'wifi_password', 'username', 'password', 'season',
+                    'seasonparticipant', 'start_dtm', 'end_dtm', 'active')
+
+
 admin.site.register(Attendance, AttendanceAdmin)
 admin.site.register(SeasonParticipant)
 admin.site.register(ParticipantsFile)
 admin.site.register(Workshop)
 admin.site.register(Department)
 admin.site.register(Union)
+admin.site.register(WiFiPasswords, WiFiPasswordAdmin)
+admin.site.register(WiFiFile)
