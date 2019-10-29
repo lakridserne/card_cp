@@ -229,8 +229,8 @@ class ParticipantAdmin(admin.ModelAdmin):
                                 seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,season=workshop.season)
                                 add_participant = WorkshopParticipant(seasonparticipant=seasonparticipant,workshop=workshop,participant=current_participant)
                                 add_participant.save()
-                except Exception as e:
-                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + "." + str(e.message))
+                except Exception, e:
+                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + "." + unicode(e))
                     return
 
                 #return ok message
