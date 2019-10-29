@@ -217,7 +217,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 
                 # make sure person is not already added
                 added_counter = 0
-                already_added = Participants.objects.filter(workshopparticipant__workshop=mass_add_workshop_form.cleaned_data['workshop'], workshopparticipant__participant__in=queryset).all()
+                already_added = Participants.objects.filter(workshopparticipant__workshop=workshop, workshopparticipant__participant__in=queryset).all()
                 list(already_added)
                 already_added_ids = already_added.values_list('id', flat=True)
 
@@ -226,11 +226,11 @@ class ParticipantAdmin(admin.ModelAdmin):
                         for current_participant in queryset:
                             if (current_participant.id not in already_added_ids):
                                 added_counter += 1
-                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id)
+                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,workshop=workshop)
                                 add_participant = WorkshopParticipant(seasonparticipant=seasonparticipant,workshop=workshop,participant=current_participant)
                                 add_participant.save()
                 except Exception as e:
-                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + ".")
+                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + "." + str(e))
                     return
 
                 #return ok message
