@@ -226,7 +226,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                         for current_participant in queryset:
                             if (current_participant.id not in already_added_ids):
                                 added_counter += 1
-                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,season=workshop__season)
+                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,season=workshop.season)
                                 add_participant = WorkshopParticipant(seasonparticipant=seasonparticipant,workshop=workshop,participant=current_participant)
                                 add_participant.save()
                 except Exception as e:
