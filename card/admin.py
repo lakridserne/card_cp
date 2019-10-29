@@ -226,11 +226,11 @@ class ParticipantAdmin(admin.ModelAdmin):
                         for current_participant in queryset:
                             if (current_participant.id not in already_added_ids):
                                 added_counter += 1
-                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,season=workshop.season)
+                                seasonparticipant = SeasonParticipant.objects.get(participant__pk=current_participant.id,season=workshop.season.pk)
                                 add_participant = WorkshopParticipant(seasonparticipant=seasonparticipant,workshop=workshop,participant=current_participant)
                                 add_participant.save()
-                except Exception, e:
-                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + "." + unicode(e))
+                except Exception as e:
+                    messages.error(request,"Fejl - ingen personer blev tilføjet til workshoppen. Der var problemer med " + add_participant.participant.name + ".")
                     return
 
                 #return ok message
