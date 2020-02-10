@@ -1,36 +1,36 @@
 import sys
-from urllib.request import urlopen
-from urllib.error import URLError, HTTPError
+import urllib3
 
 
 def get_status_code(path):
+    http = urllib3.PoolManager()
     try:
-        response = urlopen(path)
-        return response.getcode()
+        response = http.request("GET", path)
+        return response.status
     except HTTPError as e:
-        print("Arrrrrrrrrr! Noget gik galt. Find Kristoffer og sig ", e.code,
-              " til ham!")
-    except URLError as e:
-        print("Arrrrrrrrrr! Noget gik galt! Find Kristoffer og sig ", e.reason,
-              " til ham!")
+        print(
+            "Arrrrrrrrrr! Noget gik galt. Find Kristoffer og sig ", e.code, " til ham!"
+        )
 
 
 def get_card_number():
     # translate numbers
-    hid = {30: '1',
-           31: '2',
-           32: '3',
-           33: '4',
-           34: '5',
-           35: '6',
-           36: '7',
-           37: '8',
-           38: '9',
-           39: '0'}
+    hid = {
+        30: "1",
+        31: "2",
+        32: "3",
+        33: "4",
+        34: "5",
+        35: "6",
+        36: "7",
+        37: "8",
+        38: "9",
+        39: "0",
+    }
 
     print("Vis mig dit kort!")
     if sys.platform == "linux" or sys.platform == "linux2":
-        with open('/dev/hidraw0', 'rb') as fp:
+        with open("/dev/hidraw0", "rb") as fp:
             ss = ""
             done = False
             while not done:
@@ -53,7 +53,5 @@ def get_card_number():
 
 while 1:
     ss = get_card_number()
-    if(get_status_code(
-                        "https://kort.codingpirates.dk/checkin/" + ss + "/"
-                        ) == 200):
+    if get_status_code("https://kort.codingpirates.dk/checkin/" + ss + "/") == 200:
         print("Ahoy me hearties! Velkommen ombord på skibet! Arrrrrrrr!!!")
