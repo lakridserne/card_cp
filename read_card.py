@@ -9,13 +9,19 @@ def get_status_code(path):
         return response.getcode()
     except HTTPError as e:
         print(
-            "Arrrrrrrrrr! Noget gik galt. Find Kristoffer og sig ", e.code, " til ham!"
+            (
+                "Arrrrrrrrrr! Noget gik galt. Find Kristoffer og sig ",
+                e.code,
+                " til ham!",
+            )
         )
     except URLError as e:
         print(
-            "Arrrrrrrrrr! Noget gik galt! Find Kristoffer og sig ",
-            e.reason,
-            " til ham!",
+            (
+                "Arrrrrrrrrr! Noget gik galt! Find Kristoffer og sig ",
+                e.reason,
+                " til ham!",
+            )
         )
 
 
@@ -49,7 +55,7 @@ def get_card_number():
                             break
                         ss += hid[c]
     elif sys.platform == "win32":
-        ss = str(input())
+        ss = str(eval(input()))
     else:
         ss = 0
         print("Unfortunately your system is not supported")
