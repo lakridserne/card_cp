@@ -1,15 +1,21 @@
 import sys
-import urllib3
+from urllib.request import urlopen
+from urllib.error import URLError, HTTPError
 
 
 def get_status_code(path):
-    http = urllib3.PoolManager()
     try:
-        response = http.request("GET", path)
-        return response.status
+        response = urlopen(path)
+        return response.getcode()
     except HTTPError as e:
         print(
             "Arrrrrrrrrr! Noget gik galt. Find Kristoffer og sig ", e.code, " til ham!"
+        )
+    except URLError as e:
+        print(
+            "Arrrrrrrrrr! Noget gik galt! Find Kristoffer og sig ",
+            e.reason,
+            " til ham!",
         )
 
 
