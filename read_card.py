@@ -42,6 +42,8 @@ def get_card_number():
 
     print("Vis mig dit kort!")
     if sys.platform == "linux" or sys.platform == "linux2":
+        # Check the path. If it's the only device, it will be hidraw0, but I had an error
+        # where I had a keyboard and such connected, and it didn't work.
         with open("/dev/hidraw0", "rb") as fp:
             ss = ""
             done = False
