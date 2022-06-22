@@ -2,5 +2,3 @@ Django==3.2.13
 django-extensions==2.1.2
 djangorestframework==3.12.4
 django-daterange-filterspec==2.0.4
-daterange==0.2
-wheel==0.37.1
