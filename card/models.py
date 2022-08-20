@@ -204,6 +204,7 @@ class ParticipantsFile(models.Model):
         verbose_name = "Upload medlemsfil"
         verbose_name_plural = "Upload medlemsfiler"
     data = models.FileField()
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         super(ParticipantsFile, self).save(*args, **kwargs)
@@ -214,5 +215,11 @@ class ParticipantsFile(models.Model):
             for row in reader:
                 _, created = Participants.objects.get_or_create(
                     name=row[0],
+                )
+                
+                # Add to season
+                season_participant = SeasonParticipant.objects_get_or_create(
+                    season = season,
+                    participant = created,
                 )
         self.delete()
