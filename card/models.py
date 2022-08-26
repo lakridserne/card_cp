@@ -204,15 +204,22 @@ class ParticipantsFile(models.Model):
         verbose_name = "Upload medlemsfil"
         verbose_name_plural = "Upload medlemsfiler"
     data = models.FileField()
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         super(ParticipantsFile, self).save(*args, **kwargs)
-        filename = self.data.url
+        filename = self.data.path
         with open(filename, 'r', encoding='utf-8') as f:
             reader = csv.reader(f, delimiter = ';')
             next(reader)
             for row in reader:
                 _, created = Participants.objects.get_or_create(
                     name=row[0],
+                )
+                
+                # Add to season
+                season_participant = SeasonParticipant.objects.get_or_create(
+                    season = self.season,
+                    participant = _,
                 )
         self.delete()
