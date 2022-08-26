@@ -208,7 +208,7 @@ class ParticipantsFile(models.Model):
 
     def save(self, *args, **kwargs):
         super(ParticipantsFile, self).save(*args, **kwargs)
-        filename = self.data.url
+        filename = self.data.path
         with open(filename, 'r', encoding='utf-8') as f:
             reader = csv.reader(f, delimiter = ';')
             next(reader)
@@ -218,8 +218,8 @@ class ParticipantsFile(models.Model):
                 )
                 
                 # Add to season
-                season_participant = SeasonParticipant.objects_get_or_create(
-                    season = season,
-                    participant = created,
+                season_participant = SeasonParticipant.objects.get_or_create(
+                    season = self.season,
+                    participant = _,
                 )
         self.delete()
