@@ -335,6 +335,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 
         class MassAdd(forms.Form):
             status = forms.ChoiceField(label="Status", choices=status_list)
+            date = forms.DateTimeField(label="Klubaften dato", initial=timezone.now())
 
         # get selected persons
         persons = queryset
@@ -355,7 +356,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                 # make sure person is not already added
                 added_counter = 0
                 already_added = Attendance.objects.filter(
-                    participant__in=queryset, registered_dtm__date=timezone.now()
+                    participant__in=queryset, registered_dtm__date=register_attendance_multi_form.cleaned_data['date']
                 ).all()
                 list(already_added)
                 already_added_ids = already_added.values_list(
@@ -375,14 +376,14 @@ class ParticipantAdmin(admin.ModelAdmin):
                                 season = Season.objects.get(
                                     pk=seasonparticipant.season.id
                                 )
-                                workshopparticipant = WorkshopParticipant.objects.get(
+                                workshopparticipant = WorkshopParticipant.objects.filter(
                                     seasonparticipant__pk=seasonparticipant.id,
                                     added__lte=timezone.now(),
-                                )
+                                ).first()
                                 workshop = Workshop.objects.get(
                                     pk=workshopparticipant.workshop.id
                                 )
-                                registered_dtm = timezone.now()
+                                registered_dtm = register_attendance_multi_form.cleaned_data['date']
                                 status = register_attendance_multi_form.cleaned_data[
                                     "status"
                                 ]
