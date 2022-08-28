@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.db import models, transaction
+from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render
 from django.conf.urls import include, url
@@ -142,7 +143,7 @@ class ParticipantAdmin(admin.ModelAdmin):
         CardListFilter,
     )
     search_fields = ("name", "cards__card_number")
-    actions = ["add_to_season", "add_to_workshop", "register_attendance_multi"]
+    actions = ["add_to_season", "add_to_workshop", "register_attendance_multi", "export_names"]
     inlines = (CardNumberInline, SeasonInline, WorkshopInline)
 
     def add_to_season(self, request, queryset):
@@ -433,6 +434,12 @@ class ParticipantAdmin(admin.ModelAdmin):
 
     register_attendance_multi.short_description = "Registrer fremmøde"
 
+    def export_names(self, request, queryset):
+        names = []
+        for person in queryset:
+            names.append(person.name)
+        
+        return HttpResponse("\n".join(list(set(names))), content_type="text/plain; charset=utf-8")
 
 admin.site.register(Participants, ParticipantAdmin)
 
