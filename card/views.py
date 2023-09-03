@@ -3,8 +3,8 @@ from django.http import HttpResponseBadRequest
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound
 from card.models import Cards, Participants, Attendance, Season, \
-                        SeasonParticipant, WorkshopParticipant
-from card.serializers import CheckInSerializer
+                        SeasonParticipant, WorkshopParticipant, Department
+from card.serializers import CheckInSerializer, WorkshopOverviewSerializer
 
 
 # Create your views here.
@@ -48,5 +48,22 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
                 registered_dtm=timezone.now(),
                 status="PR"
             )
+
+        return self.queryset
+
+
+class WorkshopAddView(viewsets.ReadOnlyModelViewSet):
+    queryset = Cards.objects.all()
+
+
+class WorkshopOverviewView(viewsets.ReadOnlyModelViewSet):
+    queryset = Season.objects.all()
+    serializer_class = WorkshopOverviewSerializer
+    lookup_field = 'department_id'
+
+    def get_queryset(self):
+        department_id = self.request.path.split('/')[2]
+
+        department = Department.objects.get(pk=department_id)
 
         return self.queryset
