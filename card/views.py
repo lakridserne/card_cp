@@ -94,7 +94,11 @@ class WorkshopAddView(viewsets.ReadOnlyModelViewSet):
 
 
 class WorkshopOverviewView(viewsets.ReadOnlyModelViewSet):
-    queryset = Season.objects.all()
+    queryset = Season.objects.filter(
+        start_date__lte=timezone.now()).filter(
+        end_date__gte=timezone.now()).filter(
+        weekday=timezone.now().weekday()
+    )
     serializer_class = WorkshopOverviewSerializer
     lookup_field = 'department_id'
 
