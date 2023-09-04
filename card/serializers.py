@@ -32,3 +32,10 @@ class WorkshopOverviewSerializer(serializers.ModelSerializer):
         model = Season
         fields = ('department', 'name', 'workshops')
         lookup_field = 'department_id'
+
+
+class WorkshopAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cards
+        fields = ('card_number',)
+        lookup_field = 'card_number'
