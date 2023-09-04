@@ -95,7 +95,7 @@ class Workshop(models.Model):
         verbose_name = "Workshop"
         verbose_name_plural = "Workshops"
     name = models.CharField('Navn', max_length=200)
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='workshops')
 
     def __str__(self):
         return (self.name +
