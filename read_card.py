@@ -2,6 +2,7 @@ import sys
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 
+mode = "input"
 
 def get_status_code(path):
     try:
@@ -41,7 +42,7 @@ def get_card_number():
     }
 
     print("Vis mig dit kort!")
-    if sys.platform == "linux" or sys.platform == "linux2":
+    if (sys.platform == "linux" or sys.platform == "linux2") and mode == "hidraw0":
         # Check the path. If it's the only device, it will be hidraw0, but I had an error
         # where I had a keyboard and such connected, and it didn't work.
         with open("/dev/hidraw0", "rb") as fp:
@@ -56,6 +57,8 @@ def get_card_number():
                             done = True
                             break
                         ss += hid[c]
+    elif (sys.platform == "linux" or sys.platform == "linux2") and mode == "input":
+        ss = input()
     elif sys.platform == "win32":
         ss = str(eval(input()))
     else:
