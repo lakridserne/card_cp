@@ -135,6 +135,7 @@ class Attendance(models.Model):
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
     registered_dtm = models.DateTimeField('Registreret', default=timezone.now)
     status = models.CharField('Fremmøde status', max_length=2, choices=ABSENCE_CHOICES)
+    registered_manually = models.BooleanField('Registreret manuelt', default=False)
 
     def __str__(self):
         return self.participant.name

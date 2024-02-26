@@ -394,6 +394,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                                     workshop=workshop,
                                     registered_dtm=registered_dtm,
                                     status=status,
+                                    registered_manually=True,
                                 )
                                 add_attendance.save()
                 except Exception as e:
