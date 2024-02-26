@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.db import models, transaction
+from django.db.models import Q, Count
 from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render
@@ -126,9 +127,9 @@ class CardListFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "any":
-            return queryset.exclude(cards__isnull=True)
+            return queryset.exclude(cards__isnull=True).filter(cards__deactivated__isnull=True).distinct()
         elif self.value() == "none":
-            return queryset.filter(cards__isnull=True)
+            return queryset.annotate(count=Count('cards__pk', filter=Q(cards__deactivated__isnull=True))).filter(Q(cards__isnull=True) | Q(cards__deactivated__isnull=False), count=0).distinct()
         elif self.value() is None:
             return queryset
 
