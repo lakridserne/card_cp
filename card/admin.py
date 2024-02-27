@@ -334,10 +334,12 @@ class ParticipantAdmin(admin.ModelAdmin):
     def register_attendance_multi(self, request, queryset):
         # make list of possibilities
         status_list = [("-", "-"), ("PR", "Fremmødt"), ("NO", "Afbud")]
+        automatic_choices = [(False, 'Nej - manuelt registreret'), (True, 'Ja - automatisk registreret')]
 
         class MassAdd(forms.Form):
             status = forms.ChoiceField(label="Status", choices=status_list)
             date = forms.DateTimeField(label="Klubaften dato", initial=timezone.now())
+            manual = forms.ChoiceField(label="Manuelt registreret?", choices=automatic_choices)
 
         # get selected persons
         persons = queryset
@@ -354,7 +356,6 @@ class ParticipantAdmin(admin.ModelAdmin):
                 register_attendance_multi_form.is_valid()
                 and register_attendance_multi_form.cleaned_data["status"] != "-"
             ):
-
                 # make sure person is not already added
                 added_counter = 0
                 already_added = Attendance.objects.filter(
@@ -395,7 +396,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                                     workshop=workshop,
                                     registered_dtm=registered_dtm,
                                     status=status,
-                                    registered_manually=True,
+                                    registered_automatically=register_attendance_multi_form.cleaned_data["manual"],
                                 )
                                 add_attendance.save()
                 except Exception as e:
@@ -490,7 +491,7 @@ class AttendanceDepartmentListFilter(admin.SimpleListFilter):
 class AttendanceAdmin(admin.ModelAdmin):
     date_hierachy = "registered_dtm"
     list_filter = (AttendanceDepartmentListFilter, ("registered_dtm", DateRangeFilter))
-    list_display = ("participant", "season", "workshop", "registered_dtm", "status")
+    list_display = ("participant", "season", "workshop", "registered_dtm", "status", "registered_automatically")
     model = Attendance
 
 
