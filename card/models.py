@@ -224,3 +224,29 @@ class ParticipantsFile(models.Model):
                     participant = _,
                 )
         self.delete()
+
+
+class ClosingDays(models.Model):
+    class Meta:
+        verbose_name = "Lukkedag"
+        verbose_name_plural = "Lukkedage"
+    name = models.CharField("Navn", max_length=128)
+    date = models.DateField("Dato")
+
+
+class Awards(models.Model):
+    class Meta:
+        verbose_name = "Præmie"
+        verbose_name_plural = "Præmier"
+    BASIC="BC"
+    MEDIUM="MM"
+    SEASON="SN"
+    AWARD_TYPES = (
+        (BASIC, 'Basalt'),
+        (MEDIUM, 'Medium'),
+        (SEASON, 'Sæson'),
+    )
+    award_type = models.CharField("Præmietype", blank=False, null=False, max_length=2, choices=AWARD_TYPES)
+    start_date = models.DateField("Startdato", blank=False, null=False)
+    end_date = models.DateField("Slutdato", blank=False, null=False)
+    delivered = models.DateField("Leveret", blank=False, null=False)
