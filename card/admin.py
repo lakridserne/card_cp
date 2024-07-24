@@ -19,6 +19,7 @@ from card.models import (
     Union,
     WiFiPasswords,
     WiFiFile,
+    ClosingDays,
 )
 from django.contrib import messages
 from daterange.filters import DateRangeFilter
@@ -518,3 +519,4 @@ admin.site.register(Department)
 admin.site.register(Union)
 admin.site.register(WiFiPasswords, WiFiPasswordAdmin)
 admin.site.register(WiFiFile)
+admin.site.register(ClosingDays)

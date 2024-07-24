@@ -230,14 +230,19 @@ class ClosingDays(models.Model):
     class Meta:
         verbose_name = "Lukkedag"
         verbose_name_plural = "Lukkedage"
+    season = models.ForeignKey("Season", on_delete=models.CASCADE)
     name = models.CharField("Navn", max_length=128)
     date = models.DateField("Dato")
+
+    def __str__(self):
+        return self.name
 
 
 class Awards(models.Model):
     class Meta:
         verbose_name = "Præmie"
         verbose_name_plural = "Præmier"
+    seasonparticipant = models.ForeignKey("SeasonParticipant", on_delete=models.CASCADE)
     BASIC="BC"
     MEDIUM="MM"
     SEASON="SN"
