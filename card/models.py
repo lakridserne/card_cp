@@ -72,6 +72,15 @@ class Season(models.Model):
     weekday = models.CharField('Ugedag', blank=False, null=False, max_length=2,
                                choices=DAYS_CHOICES)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    stickers = models.IntegerField("Antal gange for at tjene stickers", default=4, max_length=2)
+    stickers_require_row = models.BooleanField("Gangene skal være registreret i træk for stickers", default=True)
+    stickers_require_card = models.BooleanField("Kortet skal være brugt for at tælle for stickers", default=False)
+    merchandise = models.IntegerField("Antal gange for at tjene merch", default=7, max_length=2)
+    merchandise_require_row = models.BooleanField("Gangene skal være registreret i træk for merch", default=True)
+    merchandise_require_card = models.BooleanField("Kortet skal være brugt for at tælle for merch", default=True)
+    ice = models.IntegerField("Antal gange for at tjene is", default=12, max_length=2)
+    ice_require_row = models.BooleanField("Gangene skal være registreret i træk for is", default=False)
+    ice_require_card = models.BooleanField("Kortet skal være brugt for at tælle for is", default=False)
 
     def __str__(self):
         return self.name + ", " + self.department.name
