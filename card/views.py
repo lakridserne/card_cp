@@ -103,8 +103,4 @@ class WorkshopOverviewView(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'department_id'
 
     def get_queryset(self):
-        department_id = self.request.path.split('/')[2]
-
-        department = Department.objects.get(pk=department_id)
-
         return self.queryset
