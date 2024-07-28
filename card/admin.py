@@ -361,7 +361,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                 # make sure person is not already added
                 added_counter = 0
                 already_added = Attendance.objects.filter(
-                    participant__in=queryset, registered_dtm__date=register_attendance_multi_form.cleaned_data['date']
+                    participant__in=queryset, registered_at__date=register_attendance_multi_form.cleaned_data['date']
                 ).all()
                 list(already_added)
                 already_added_ids = already_added.values_list(
@@ -388,7 +388,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                                 workshop = Workshop.objects.get(
                                     pk=workshopparticipant.workshop.id
                                 )
-                                registered_dtm = register_attendance_multi_form.cleaned_data['date']
+                                registered_at = register_attendance_multi_form.cleaned_data['date']
                                 status = register_attendance_multi_form.cleaned_data[
                                     "status"
                                 ]
@@ -396,7 +396,7 @@ class ParticipantAdmin(admin.ModelAdmin):
                                     participant=current_participant,
                                     season=season,
                                     workshop=workshop,
-                                    registered_dtm=registered_dtm,
+                                    registered_at=registered_at,
                                     status=status,
                                     registered_automatically=register_attendance_multi_form.cleaned_data["manual"],
                                 )
@@ -491,9 +491,9 @@ class AttendanceDepartmentListFilter(admin.SimpleListFilter):
 
 
 class AttendanceAdmin(admin.ModelAdmin):
-    date_hierachy = "registered_dtm"
-    list_filter = (AttendanceDepartmentListFilter, ("registered_dtm", DateRangeFilter))
-    list_display = ("participant", "season", "workshop", "registered_dtm", "status", "registered_automatically")
+    date_hierachy = "registered_at"
+    list_filter = (AttendanceDepartmentListFilter, ("registered_at", DateRangeFilter))
+    list_display = ("participant", "season", "workshop", "registered_at", "status", "registered_automatically")
     model = Attendance
 
 

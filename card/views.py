@@ -12,7 +12,7 @@ import datetime
 class CheckInView(viewsets.ReadOnlyModelViewSet):
     queryset = Cards.objects.all()
     serializer_class = CheckInSerializer
-    lookup_field = 'card_number'
+    lookup_field = 'participant__cards__card_number'
 
     def get_queryset(self):
         card_number = self.request.path.split('/')[2]
@@ -39,14 +39,14 @@ class CheckInView(viewsets.ReadOnlyModelViewSet):
         attendance = Attendance.objects.filter(
             participant=participant, season=seasonparticipant.season,
             workshop=workshopparticipant.workshop,
-            registered_dtm__date=timezone.now())
+            registered_at__date=timezone.now())
 
         if not attendance.exists():
             Attendance.objects.create(
                 participant=participant,
                 season=seasonparticipant.season,
                 workshop=workshopparticipant.workshop,
-                registered_dtm=timezone.now(),
+                registered_at=timezone.now(),
                 status="PR"
             )
 
