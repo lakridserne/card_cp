@@ -373,6 +373,10 @@ class ParticipantAdmin(admin.ModelAdmin):
                         for current_participant in queryset:
                             if current_participant.id not in already_added_ids:
                                 added_counter += 1
+                                status = register_attendance_multi_form.cleaned_data[
+                                    "status"
+                                ]
+                                registered_at = register_attendance_multi_form.cleaned_data['date']
                                 seasonparticipant = SeasonParticipant.objects.get(
                                     participant__pk=current_participant.id,
                                     season__start_date__lte=timezone.now(),
@@ -385,27 +389,37 @@ class ParticipantAdmin(admin.ModelAdmin):
                                     seasonparticipant__pk=seasonparticipant.id,
                                     added__lte=timezone.now(),
                                 ).first()
-                                workshop = Workshop.objects.get(
-                                    pk=workshopparticipant.workshop.id
-                                )
-                                registered_at = register_attendance_multi_form.cleaned_data['date']
-                                status = register_attendance_multi_form.cleaned_data[
-                                    "status"
-                                ]
+
+                                if (status == "PR" and workshopparticipant == None):
+                                    messages.error(
+                                        request,
+                                        "Fejl - intet fremmøde registeret - "
+                                        + current_participant.name
+                                        + " har ikke nogen workshop registeret.",
+                                    )
+                                    return
+
                                 add_attendance = Attendance(
                                     participant=current_participant,
                                     season=season,
-                                    workshop=workshop,
                                     registered_at=registered_at,
                                     status=status,
                                     registered_automatically=register_attendance_multi_form.cleaned_data["manual"],
                                 )
+
+                                workshop = Workshop.objects.get(
+                                    pk=workshopparticipant.workshop.id
+                                )
+
+                                if (workshopparticipant != None):
+                                    add_attendance.workshop = workshop
+                                    
                                 add_attendance.save()
                 except Exception as e:
                     messages.error(
                         request,
                         "Fejl - ingen personer fik registreret fremmøde. Der var problemer med "
-                        + add_attendance.participant.name
+                        + current_participant.name
                         + ".",
                     )
                     return

@@ -141,7 +141,7 @@ class Attendance(models.Model):
     )
     participant = models.ForeignKey(Participants, on_delete=models.CASCADE)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
+    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, null=True, blank=True)
     registered_at = models.DateTimeField('Registreret', default=timezone.now)
     status = models.CharField('Fremmøde status', max_length=2, choices=ABSENCE_CHOICES)
     registered_automatically = models.BooleanField('Registreret automatisk', default=True)
