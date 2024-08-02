@@ -407,11 +407,10 @@ class ParticipantAdmin(admin.ModelAdmin):
                                     registered_automatically=register_attendance_multi_form.cleaned_data["manual"],
                                 )
 
-                                workshop = Workshop.objects.get(
-                                    pk=workshopparticipant.workshop.id
-                                )
-
                                 if (workshopparticipant != None):
+                                    workshop = Workshop.objects.get(
+                                        pk=workshopparticipant.workshop.id
+                                    )
                                     add_attendance.workshop = workshop
                                     
                                 add_attendance.save()
