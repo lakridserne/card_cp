@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.http import HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound
 from card.models import Cards, Participants, Attendance, Season, \
@@ -12,11 +12,14 @@ import datetime
 class CheckInView(viewsets.ReadOnlyModelViewSet):
     queryset = Cards.objects.all()
     serializer_class = CheckInSerializer
-    lookup_field = 'participant__cards__card_number'
+    lookup_field = 'card_number'
 
     def get_queryset(self):
         card_number = self.request.path.split('/')[2]
-        participant = Participants.objects.get(cards__card_number=card_number)
+        try:
+            participant = Participants.objects.get(cards__card_number=card_number)
+        except Participants.DoesNotExist:
+            raise Http404
 
         # figure out season and workshop
         seasonparticipants = SeasonParticipant.objects.filter(
